@@ -219,5 +219,5 @@ SELECT
 	SUM(slots) AS usagebymember
 FROM Bookings
 WHERE memid <> 0
-GROUP By month
+GROUP By month;
 
