@@ -158,6 +158,32 @@ WHERE
 	AND cost > 30
 ORDER BY cost DESC;
 
+/* Using CTE */
+WITH Bookingcosts AS (
+	SELECT
+		starttime,
+		name,
+		memid,
+		CASE
+			WHEN memid = 0 THEN slots * guestcost
+			ELSE slots * membercost
+		END AS cost
+	FROM Bookings
+	LEFT JOIN Facilities
+	USING (facid)
+)
+SELECT
+	name AS facility,
+	CONCAT(firstname, ' ', surname) AS member,
+	cost
+FROM Bookingcosts
+LEFT JOIN Members
+USING (memid)
+WHERE
+	DATE(starttime) = '2012-09-14'
+	AND cost > 30
+ORDER BY cost DESC;
+
 
 /* PART 2: SQLite
 
@@ -169,6 +195,7 @@ QUESTIONS:
 The output of facility name and total revenue, sorted by revenue. Remember
 that there's a different cost for guests and members! */
 
+/* Using subquery */
 SELECT
 	name AS facility,
 	SUM(revenue) AS totalrevenue
@@ -183,6 +210,26 @@ FROM (
     LEFT JOIN Facilities
     USING (facid)
     ) AS t
+GROUP BY facility
+HAVING totalrevenue < 1000
+ORDER BY totalrevenue;
+
+/* Using CTE */
+WITH Revenue AS (
+	SELECT
+		name,
+		CASE 
+ 			WHEN memid = 0 THEN slots * guestcost
+			ELSE slots * membercost
+		END AS revenue
+ 	FROM Bookings
+	LEFT JOIN Facilities
+	USING (facid)
+	)
+SELECT
+	name AS facility,
+	SUM(revenue) AS totalrevenue
+FROM Revenue
 GROUP BY facility
 HAVING totalrevenue < 1000
 ORDER BY totalrevenue;
